@@ -5,7 +5,7 @@
         border: 1px solid black;
         width: 100vw;
         height: 500px;
-        overflow: auto;
+        overflow: hidden;
       }
 
       .header {
@@ -23,6 +23,8 @@
 
       .table_wrapper {
         display: flex;
+        height: 450px;
+        overflow: auto;
       }
 
       #y_axis {
@@ -48,17 +50,19 @@
       </div>
     </div>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="./Observable.js"></script>
     <script src="./js_header.js"></script>
     <script src="./js_table.js"></script>
     <script src="./js_chart.js"></script>
     <script>
-      const VIEW_BOX = {
-        width: 1800,
-        height: 1000,
-        margin: 0,
-      }
 
       const rowCount = 15;
+      const barHeight = 50;
+      const VIEW_BOX = {
+        width: 1800,
+        height: rowCount * barHeight,
+        margin: 0,
+      }
 
       function mockGenerator (length = 10) {
         return Array(length).fill(0).map(() => ({

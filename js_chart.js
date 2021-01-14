@@ -26,6 +26,7 @@ class JSChart {
     new JSTable({
       ...options,
       margin: 0,
+      scrollWrapperEl: '.table_wrapper',
       xScale: this.xScale,
       xAxis: this.xAxis,
       barHeight: this.barHeight,

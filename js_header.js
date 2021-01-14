@@ -14,9 +14,8 @@ class JSHeader {
     // Element
     this.svgElement = this.createSvgElement();
     this.xAxisElement = this.createXAxisElement();
-    
-    // handler
-    this.bindZoomHandler();
+
+    Observable.subscribe('zoom', this.zoomHandler.bind(this));
   }
 
   /**
@@ -43,22 +42,6 @@ class JSHeader {
   /**
    * handler
    */
-  bindZoomHandler () {
-    const zoomExtent = [
-      [0, 0], 
-      [this.width, this.height]
-    ];
-
-    this.svgElement.call(
-      d3
-        .zoom()
-        .scaleExtent([1, 10])
-        .translateExtent(zoomExtent)
-        .extent(zoomExtent)
-        .on("zoom", this.zoomHandler.bind(this))
-    )
-  }
-
   zoomHandler (event) {    
     this.xScale.range([0, this.width - 0].map(d => event.transform.applyX(d)));
 

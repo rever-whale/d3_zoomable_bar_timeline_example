@@ -6,6 +6,9 @@ class JSTable {
     this.data = options.data;
     this.rowCount = options.rowCount;
     this.elQuery = options.elQuery;
+    this.scrollWrapperEl = options.scrollWrapperEl;
+    this.y_axis_width = 100;
+    this.cursor_width = 10;
     
     // Information
     this.xScale = options.xScale;
@@ -20,7 +23,7 @@ class JSTable {
     this.hoverLineElement = null;
     
     // handler
-    this.bindZoomHandler();
+    // this.bindZoomHandler();
     this.bindHoverHandler();
   }
 
@@ -103,8 +106,7 @@ class JSTable {
       this.xScale,
       event.transform.rescaleX(this.xScale)
     );
-    
-    this.xScale.range([this.margin, this.width - this.margin].map(d => event.transform.applyX(d)));
+
     this.svgElement.selectAll("rect.bars")
       .attr("x", d => this.xScale(d.x))
       .attr("width", d => rescaleX(d.y));
@@ -113,6 +115,8 @@ class JSTable {
     this.svgElement.selectAll('rect.row')
       .attr('x', () => this.xScale(0))
       .attr('width', () => rescaleX(this.width) - this.margin * 2);
+
+    Observable.publish('zoom', event);
   }
 
   getRescaleHandler (originScale, targetScale) {
@@ -136,10 +140,14 @@ class JSTable {
 
   mouseMoveHandler (event) {    
     this.hoverLineElement
-      .attr('d', () => this.getLine([[event.x, this.margin], [event.x, (this.barHeight * this.rowCount) + this.margin]]))
+      .attr('d', () => this.getLine([
+        [event.x - this.cursor_width - this.y_axis_width, this.margin],
+        [event.x - this.cursor_width - this.y_axis_width, (this.barHeight * this.rowCount) + this.margin]
+      ]))
 
-    const scrollTop = document.querySelector(this.elQuery).scrollTop;
-    const rowIndex = this.getRowIndexFromMousePos(event.x, event.y + scrollTop - this.barHeight);
+    const scrollTop = document.querySelector(this.scrollWrapperEl).scrollTop;
+    console.log(scrollTop)
+    const rowIndex = this.getRowIndexFromMousePos(event.x, event.y + scrollTop - 50);
     if (rowIndex === -1) {
         this.svgElement
           .selectAll('rect.row')
@@ -161,7 +169,10 @@ class JSTable {
     this.hoverLineElement = this.svgElement
       .append('path')
       .attr('class', 'hoverline')
-      .attr('d', () => this.getLine([[event.x, this.margin], [event.x, (this.barHeight * this.rowCount) + this.margin]]))
+      .attr('d', () => this.getLine([
+        [event.x - this.cursor_width - this.y_axis_width, this.margin],
+        [event.x - this.cursor_width - this.y_axis_width, (this.barHeight * this.rowCount) + this.margin]
+      ]))
       .attr("stroke", "black");
   }
 
