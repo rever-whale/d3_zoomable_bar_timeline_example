@@ -21,7 +21,7 @@ class JSChart {
     this.hoverLineElement = null;
     
     // handler
-    this.bindZoomHandler();
+    // this.bindZoomHandler();
     this.bindHoverHandler();
   }
 
@@ -153,11 +153,12 @@ class JSChart {
     return d3.line()(posArray);
   }
 
-  mouseMoveHandler (event) {
+  mouseMoveHandler (event) {    
     this.hoverLineElement
       .attr('d', () => this.getLine([[event.x, this.margin], [event.x, (this.barHeight * this.rowCount) + this.margin]]))
 
-    const rowIndex = this.getRowIndexFromMousePos(event.x, event.y);
+    const scrollTop = document.querySelector(this.elQuery).scrollTop;
+    const rowIndex = this.getRowIndexFromMousePos(event.x, event.y + scrollTop);
     if (rowIndex === -1) {
         this.svgElement
           .selectAll('rect.row')
