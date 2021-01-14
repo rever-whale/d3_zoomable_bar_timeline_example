@@ -32,7 +32,7 @@ class JSChart {
 
     return d3.scaleLinear()
       .range([VIEW_BOX.margin, VIEW_BOX.width - VIEW_BOX.margin])
-      .domain([0, xMax]);
+      .domain([0, 100]);
   }
 
   createXAxis () {
@@ -107,7 +107,7 @@ class JSChart {
     this.svgElement.call(
       d3
         .zoom()
-        .scaleExtent([1, 5])
+        .scaleExtent([1, 10])
         .translateExtent(zoomExtent)
         .extent(zoomExtent)
         .on("zoom", this.zoomHandler.bind(this))
@@ -154,7 +154,7 @@ class JSChart {
 
   mouseMoveHandler (event) {
     this.hoverLineElement
-      .attr('d', () => this.getLine([[event.x, 0], [event.x, this.height]]))
+      .attr('d', () => this.getLine([[event.x, this.margin], [event.x, (this.barHeight * this.rowCount) + this.margin]]))
 
     const rowIndex = this.getRowIndexFromMousePos(event.x, event.y);
     if (rowIndex === -1) {
@@ -178,7 +178,7 @@ class JSChart {
     this.hoverLineElement = this.svgElement
       .append('path')
       .attr('class', 'hoverline')
-      .attr('d', () => this.getLine([[event.x, 0], [event.x, this.height]]))
+      .attr('d', () => this.getLine([[event.x, this.margin], [event.x, (this.barHeight * this.rowCount) + this.margin]]))
       .attr("stroke", "black");
   }
 
