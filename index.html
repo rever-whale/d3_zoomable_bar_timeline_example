@@ -1,26 +1,61 @@
 <html>
   <head>
     <style>
-      svg {
-        
-      }
       #app {
         border: 1px solid black;
         width: 100vw;
         height: 500px;
         overflow: auto;
       }
+
+      .header {
+        display: flex;
+      }
+
+      .x_blank {
+        flex-basis: 100px;
+      }
+
+      #x_axis {
+        flex: 1;
+        height: 50px;
+      }
+
+      .table_wrapper {
+        display: flex;
+      }
+
+      #y_axis {
+        flex-basis: 100px;
+        background-color: aqua;
+      }
+
+      #table {
+        flex: 1;
+      }
+
     </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="header">
+        <div class="x_blank"></div>
+        <div id="x_axis"></div>
+      </div>
+      <div class="table_wrapper">
+        <div id="y_axis">y축</div>
+        <div id="table"></div>
+      </div>
+    </div>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="./js_header.js"></script>
+    <script src="./js_table.js"></script>
     <script src="./js_chart.js"></script>
     <script>
       const VIEW_BOX = {
         width: 1800,
         height: 1000,
-        margin: 50,
+        margin: 0,
       }
 
       const rowCount = 15;
@@ -39,7 +74,7 @@
         ...VIEW_BOX,
         data,
         rowCount,
-        elQuery: '#app'
+        elQuery: '#table'
       });
     </script>
   </body>
