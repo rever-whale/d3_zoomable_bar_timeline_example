@@ -1,0 +1,26 @@
+<html>
+  <head></head>
+  <body>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="./js_chart.js"></script>
+    <script>
+      const VIEW_BOX = {
+        width: 1800,
+        height: 500,
+        margin: 50,
+      }
+
+      function mockGenerator (length = 10) {
+        return Array(length).fill(0).map(() => ({
+          x: Math.floor(Math.random() * 100),
+          y: Math.floor(Math.random() * 10)
+        }));
+      }
+
+      new JSChart({
+        ...VIEW_BOX,
+        data: mockGenerator()
+      });
+    </script>
+  </body>
+</html>
