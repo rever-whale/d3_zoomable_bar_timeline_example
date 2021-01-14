@@ -5,6 +5,7 @@ class JSChart {
     this.margin = options.margin;
     this.data = options.data;
     this.rowCount = options.rowCount;
+    this.elQuery = options.elQuery;
     
     // Information
     this.xScale = this.createXScale();
@@ -46,7 +47,7 @@ class JSChart {
    */
   createSvgElement () {
     return d3
-      .select('body')
+      .select(this.elQuery)
       .append('svg')
       .attr('width', VIEW_BOX.width)
       .attr('height', VIEW_BOX.height)
