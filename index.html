@@ -1,25 +1,37 @@
 <html>
-  <head></head>
+  <head>
+    <style>
+      svg {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
   <body>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="./js_chart.js"></script>
     <script>
       const VIEW_BOX = {
         width: 1800,
-        height: 500,
+        height: 1000,
         margin: 50,
       }
+
+      const rowCount = 10;
 
       function mockGenerator (length = 10) {
         return Array(length).fill(0).map(() => ({
           x: Math.floor(Math.random() * 100),
-          y: Math.floor(Math.random() * 10)
+          y: Math.floor(Math.random() * 10),
+          z: Math.floor(Math.random() * rowCount),
         }));
       }
 
+      const data = mockGenerator(20);
+      console.log(data);
       new JSChart({
         ...VIEW_BOX,
-        data: mockGenerator()
+        data,
+        rowCount,
       });
     </script>
   </body>

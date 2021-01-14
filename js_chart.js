@@ -4,29 +4,35 @@ class JSChart {
     this.height = options.height;
     this.margin = options.margin;
     this.data = options.data;
+    this.rowCount = options.rowCount;
     
     // Information
     this.xScale = this.createXScale();
     this.xAxis = this.createXAxis();
+    this.barHeight = 50;
+    this.preHoverRowIndex = -1;
 
     // Element
     this.svgElement = this.createSvgElement();
     this.xAxisElement = this.createXAxisElement();
     this.tableElement = this.createTableElement();
+    this.rowSeperator = this.createRowSeperators();
+    this.hoverLineElement = null;
     
     // handler
     this.bindZoomHandler();
+    this.bindHoverHandler();
   }
 
   /**
    * Information
    */
   createXScale () {
-    const xExtent = d3.extent(this.data, d => d.x);
+    const xMax = d3.max(this.data, d => d.x);
 
     return d3.scaleLinear()
       .range([VIEW_BOX.margin, VIEW_BOX.width - VIEW_BOX.margin])
-      .domain(xExtent);
+      .domain([0, xMax]);
   }
 
   createXAxis () {
@@ -66,9 +72,27 @@ class JSChart {
         .append('rect')
         .attr('class', 'bars')
         .attr('x', d => this.xScale(d.x))
-        .attr('y', this.margin)
+        .attr('y', d => (d.z * this.barHeight) + this.margin)
         .attr('width', d => d.y)
-        .attr('height', d => d.y ? 100 : 0);
+        .attr('height', d => d.y ? this.barHeight : 0);
+  }
+
+  createRowSeperators () {
+    const dummy = Array(this.rowCount).fill(0);
+    d3.select('g.table')
+      .selectAll('rect.row')
+      .data(dummy)
+      .enter()
+        .append('rect')
+        .attr('class', 'row')
+        .attr('data-idx', (_, i) => i)
+        .attr('x', this.margin)
+        .attr('y', (d, i) => i * this.barHeight + this.margin)
+        .attr('width', this.width - this.margin * 2)
+        .attr('height', this.barHeight)
+        .style('fill', 'none')
+        .style('stroke', 'black')
+        .style('stroke-width', 0.5)
   }
 
   /**
@@ -104,6 +128,9 @@ class JSChart {
     // update axis tick
     this.xAxis.ticks(this.xAxisElement.node().getBBox().width / 40);
     this.xAxisElement.call(this.xAxis);
+    this.svgElement.selectAll('rect.row')
+      .attr('x', () => this.xScale(0))
+      .attr('width', () => rescaleX(this.width) - this.margin * 2);
   }
 
   getRescaleHandler (originScale, targetScale) {
@@ -112,5 +139,55 @@ class JSChart {
     const scaleRate = (max1 - min1) / (max2 - min2);
 
     return value =>  Math.floor(value * scaleRate)
+  }
+
+  bindHoverHandler () {
+    this.svgElement
+      .on('mousemove', this.mouseMoveHandler.bind(this))
+      .on('mouseover', this.mouseOverHandler.bind(this))
+      .on('mouseout', this.mouseOutHandler.bind(this));
+  }
+
+  getLine (posArray) {
+    return d3.line()(posArray);
+  }
+
+  mouseMoveHandler (event) {
+    this.hoverLineElement
+      .attr('d', () => this.getLine([[event.x, 0], [event.x, this.height]]))
+
+    const rowIndex = this.getRowIndexFromMousePos(event.x, event.y);
+    if (rowIndex === -1) {
+        this.svgElement
+          .selectAll('rect.row')
+          .style('fill', 'none');
+    } else if (this.preHoverRowIndex !== rowIndex) {
+      this.svgElement
+        .select(`rect.row[data-idx="${this.preHoverRowIndex}"]`)
+        .style('fill', 'none');
+
+      this.svgElement
+        .select(`rect.row[data-idx="${rowIndex}"]`)
+        .style('fill', 'rgba(0,0,0,.2)');
+
+      this.preHoverRowIndex = rowIndex;
+    } 
+  }
+
+  mouseOverHandler (event) {
+    this.hoverLineElement = this.svgElement
+      .append('path')
+      .attr('class', 'hoverline')
+      .attr('d', () => this.getLine([[event.x, 0], [event.x, this.height]]))
+      .attr("stroke", "black");
+  }
+
+  mouseOutHandler () {
+    this.hoverLineElement.remove();
+  }
+
+  getRowIndexFromMousePos (posX, posY) {
+    const rowIndex = Math.floor((posY - this.margin) / this.barHeight);
+    return (posX >= this.margin || posX < this.margin + this.width) ? rowIndex : -1;
   }
 }
