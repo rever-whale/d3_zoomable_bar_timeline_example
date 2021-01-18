@@ -1,5 +1,6 @@
 import Observable from './Observable';
 
+const MAGIC_HEIGHT = 50;
 export default class JSTable {
   constructor (options) {
     this.width = options.width;
@@ -41,14 +42,6 @@ export default class JSTable {
       .attr('overflow', 'scroll')
   }
 
-  createXAxisElement () {
-    return this.svgElement
-      .append('g')
-        .attr('class', 'axis_x')
-        .attr('transform', `translate(0,${this.margin})`)
-        .call(this.xAxis);
-  }
-
   createTableElement () {
     const table = this.svgElement
       .append('g')
@@ -61,7 +54,7 @@ export default class JSTable {
         .append('rect')
         .attr('class', 'bars')
         .attr('x', d => this.xScale(d.x))
-        .attr('y', d => (d.z * this.barHeight) + this.margin)
+        .attr('y', d => (d.z * this.barHeight) + this.margin + MAGIC_HEIGHT)
         .attr('width', d => d.y)
         .attr('height', d => d.y ? this.barHeight : 0);
   }
@@ -75,8 +68,8 @@ export default class JSTable {
         .append('rect')
         .attr('class', 'row')
         .attr('data-idx', (_, i) => i)
-        .attr('x', this.margin)
-        .attr('y', (d, i) => i * this.barHeight + this.margin)
+        .attr('x', 0)
+        .attr('y', (d, i) => i * this.barHeight + this.margin + MAGIC_HEIGHT)
         .attr('width', this.width - this.margin * 2)
         .attr('height', this.barHeight)
         .style('fill', 'none')
@@ -96,7 +89,7 @@ export default class JSTable {
     this.svgElement.call(
       d3
         .zoom()
-        .scaleExtent([1, 10])
+        .scaleExtent([1, 8])
         .translateExtent(zoomExtent)
         .extent(zoomExtent)
         .on("zoom", this.zoomHandler.bind(this))
@@ -112,11 +105,6 @@ export default class JSTable {
     this.svgElement.selectAll("rect.bars")
       .attr("x", d => this.xScale(d.x))
       .attr("width", d => rescaleX(d.y));
-
-    // update axis tick
-    this.svgElement.selectAll('rect.row')
-      .attr('x', () => this.xScale(0))
-      .attr('width', () => rescaleX(this.width) - this.margin * 2);
 
     Observable.publish('zoom', event);
   }
@@ -143,13 +131,12 @@ export default class JSTable {
   mouseMoveHandler (event) {    
     this.hoverLineElement
       .attr('d', () => this.getLine([
-        [event.x - this.cursor_width - this.y_axis_width, this.margin],
-        [event.x - this.cursor_width - this.y_axis_width, (this.barHeight * this.rowCount) + this.margin]
+        [event.x - this.cursor_width - this.y_axis_width, this.margin + MAGIC_HEIGHT],
+        [event.x - this.cursor_width - this.y_axis_width, (this.barHeight * this.rowCount) + this.margin + MAGIC_HEIGHT]
       ]))
 
-    const scrollTop = document.querySelector(this.scrollWrapperEl).scrollTop;
-    console.log(scrollTop)
-    const rowIndex = this.getRowIndexFromMousePos(event.x, event.y + scrollTop - 50);
+    const scrollTop = document.querySelector(this.scrollWrapperEl).scrollTop - MAGIC_HEIGHT;
+    const rowIndex = this.getRowIndexFromMousePos(event.x, event.y + scrollTop);
     if (rowIndex === -1) {
         this.svgElement
           .selectAll('rect.row')
@@ -164,7 +151,9 @@ export default class JSTable {
         .style('fill', 'rgba(0,0,0,.2)');
 
       this.preHoverRowIndex = rowIndex;
-    } 
+    }
+
+    Observable.publish('hover', rowIndex);
   }
 
   mouseOverHandler (event) {

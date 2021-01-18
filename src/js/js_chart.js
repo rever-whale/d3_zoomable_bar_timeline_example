@@ -1,5 +1,6 @@
 import JSTable from './js_table';
 import JSHeader from './js_header';
+import JSAxis from './js_axis';
 
 export default class JSChart {
   constructor (options) {
@@ -19,7 +20,7 @@ export default class JSChart {
     new JSHeader({
       ...options,
       margin: 50,
-      width: 1800,
+      width: this.width,
       height: 50,
       xScale: this.xScale,
       xAxis: this.xAxis,
@@ -29,11 +30,21 @@ export default class JSChart {
     new JSTable({
       ...options,
       margin: 0,
-      scrollWrapperEl: '.table_wrapper',
+      height: this.height + 50,
+      scrollWrapperEl: '#app',
       xScale: this.xScale,
       xAxis: this.xAxis,
       barHeight: this.barHeight,
       elQuery: '#table',
+    })
+
+    new JSAxis({
+      ...options,
+      height: this.height + 50,
+      width: 100,
+      barHeight: this.barHeight,
+      margin: 50,
+      elQuery: '#axis'
     })
   }
 
@@ -41,15 +52,32 @@ export default class JSChart {
    * Information
    */
   createXScale () {
-    // const xMax = d3.max(this.data, d => d.x);
-    return d3.scaleLinear()
+    const [today, tomorrow] = this.getTodayAndTomorrowTimestamp();
+
+    return d3.scaleTime()
       .range([this.margin, this.width - this.margin])
-      .domain([0, 100]);
+      .domain([today, tomorrow]);
   }
 
   createXAxis () {
     return d3
       .axisTop(this.xScale)
-      .ticks(this.width / 40);
+      .ticks(d3.timeHour)
+      .tickFormat(d3.timeFormat('%H:%M'));
+  }
+
+  /**
+   * utils
+   */
+
+  getTodayAndTomorrowTimestamp () {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    return [new Date(), tomorrow]
+  }
+
+  getTimestamp (date) {
+    return Math.floor(+date / 1000);
   }
 }

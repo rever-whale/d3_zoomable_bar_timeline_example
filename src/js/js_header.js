@@ -46,9 +46,18 @@ export default class JSHeader {
    */
   zoomHandler (event) {    
     this.xScale.range([0, this.width - 0].map(d => event.transform.applyX(d)));
-
-    // update axis tick
-    this.xAxis.ticks(this.xAxisElement.node().getBBox().width / 40);
+    
+    const {k:zoomScale} = event.transform;
+    if (zoomScale > 5) {
+      this.xAxis.ticks(d3.timeMinute.every(10));
+    } else if (zoomScale > 4) {
+      this.xAxis.ticks(d3.timeMinute.every(15));
+    } else if (zoomScale > 2) {
+      this.xAxis.ticks(d3.timeMinute.every(30));
+    } else {
+      this.xAxis.ticks(d3.timeHour);
+    }
+    
     this.xAxisElement.call(this.xAxis);
   }
 }
